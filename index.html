@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Happy Mrs. Chicken</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; }
+    canvas { display: block; }
+    canvas {
+    background: #3AC1FB;
+  }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+  
+  (() => {
+    window.addEventListener('resize', resizeCanvas, false);
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    
+    
+    function resizeCanvas() {
+      console.log('resizeCanvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var x = canvas.width/2;
+      var y = canvas.height/2;
+
+      function drawChicken(x, y) {
+        console.log(x, y);
+        var img = new Image();
+        img.onload = function() {
+          const width = 100;
+          const height = 100;
+          context.drawImage(img, x, y, width, height);
+        }
+        img.src = "chicken.svg";
+      }
+
+      function moveChicken(dx, dy) {
+        randomSign = () => Math.sign(Math.random()-0.5);
+        console.log(randomSign());
+        x = x + randomSign()*dx;
+        y = y + randomSign()*dy;
+      }
+
+      function chickenAction() { moveChicken(50, 50); console.log("keydown"); }
+      document.addEventListener('keydown', chickenAction, false);
+
+      function draw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawChicken(x, y);
+          // requestAnimationFrame(draw);
+        }
+
+        setInterval(draw, 500);
+        // draw();
+    }
+    resizeCanvas();
+  })();
+
+</script>
+
+</body>
+</html>
