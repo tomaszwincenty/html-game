@@ -17,52 +17,72 @@
 <canvas id="canvas"></canvas>
 
 <script>
+  window.addEventListener('resize', resizeCanvas, false);
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
   
-  (() => {
-    window.addEventListener('resize', resizeCanvas, false);
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    
-    
-    function resizeCanvas() {
-      console.log('resizeCanvas');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      var x = canvas.width/2;
-      var y = canvas.height/2;
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
 
-      function drawChicken(x, y) {
-        console.log(x, y);
-        var img = new Image();
-        img.onload = function() {
-          const width = 100;
-          const height = 100;
-          context.drawImage(img, x, y, width, height);
-        }
-        img.src = "chicken.svg";
-      }
-
-      function moveChicken(dx, dy) {
-        randomSign = () => Math.sign(Math.random()-0.5);
-        console.log(randomSign());
-        x = x + randomSign()*dx;
-        y = y + randomSign()*dy;
-      }
-
-      function chickenAction() { moveChicken(50, 50); console.log("keydown"); }
-      document.addEventListener('keydown', chickenAction, false);
-
-      function draw() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        drawChicken(x, y);
-          // requestAnimationFrame(draw);
-        }
-
-        setInterval(draw, 500);
-        // draw();
+  class Chicken {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
     }
-    resizeCanvas();
-  })();
+    draw() {
+      var img = new Image();
+      img.onload = () => {
+        const width = 100;
+        const height = 100;
+        context.drawImage(img, this.x, this.y, width, height);
+      }
+      img.src = "chicken.svg";
+    }
+    move(dx, dy) {
+      const randomSign = () => Math.sign(Math.random()-0.5);
+      this.x = this.x + randomSign()*dx;
+      this.y = this.y + randomSign()*dy;
+    }
+  }
+
+  const config = {
+    inintialCoordinates: [ 
+      canvas.width/2,
+      canvas.height/2,
+  ],
+    spawningSpeed: 5,
+  }
+
+  const state = {
+    actionsCounter: 0,
+    chickens: [],
+  }
+
+  function spawnChicken(x, y) {
+    const newChicken = new Chicken(x, y);
+    state.chickens.push(newChicken);
+  }
+
+  function action() {
+    const { spawningSpeed } = config;
+    state.chickens.forEach((chicken) => chicken.move(50, 50));
+    state.actionsCounter++;
+    if (state.actionsCounter%spawningSpeed === 0) { spawnChicken(...config.inintialCoordinates); }
+  }
+
+  function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    state.chickens.forEach((chicken) => chicken.draw());
+    // requestAnimationFrame(draw);
+  }
+
+  spawnChicken(...config.inintialCoordinates);
+  setInterval(draw, 500);
+  // draw();
+  document.addEventListener('keydown', action, false);
 
 </script>
 
