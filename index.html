@@ -27,10 +27,32 @@
   }
   resizeCanvas();
 
+  class Egg {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+    draw() {
+      // var img = new Image();
+      // img.onload = () => {
+      //   const width = 100;
+      //   const height = 100;
+      //   context.drawImage(img, this.x, this.y, width, height);
+      // }
+      // img.src = "egg.svg";
+      context.beginPath();
+      context.arc(this.x, this.y, 50, 0, Math.PI*2);
+      context.fillStyle = "#0095DD";
+      context.fill();
+      context.closePath();
+    }
+  }
+
   class Chicken {
     constructor(x, y) {
       this.x = x;
       this.y = y;
+      this.eggTimer = 0;
     }
     draw() {
       var img = new Image();
@@ -45,6 +67,14 @@
       const randomSign = () => Math.sign(Math.random()-0.5);
       this.x = this.x + randomSign()*dx;
       this.y = this.y + randomSign()*dy;
+      this.eggTimer++;
+    }
+    layEgg () {
+      if (this.eggTimer === config.spawningSpeed) {
+        const newEgg = new Egg(this.x, this.y);
+        state.eggs.push(newEgg);
+        this.eggTimer = 0;      
+      }
     }
   }
 
@@ -59,6 +89,7 @@
   const state = {
     actionsCounter: 0,
     chickens: [],
+    eggs: [],
   }
 
   function spawnChicken(x, y) {
@@ -69,6 +100,7 @@
   function action() {
     const { spawningSpeed } = config;
     state.chickens.forEach((chicken) => chicken.move(50, 50));
+    state.chickens.forEach((chicken) => chicken.layEgg());
     state.actionsCounter++;
     if (state.actionsCounter%spawningSpeed === 0) { spawnChicken(...config.inintialCoordinates); }
   }
@@ -76,6 +108,7 @@
   function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     state.chickens.forEach((chicken) => chicken.draw());
+    state.eggs.forEach((egg) => egg.draw());
     // requestAnimationFrame(draw);
   }
 
