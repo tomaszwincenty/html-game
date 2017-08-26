@@ -27,10 +27,40 @@
   }
   resizeCanvas();
 
+  const config = {
+    inintialCoordinates: [ 
+      canvas.width/2,
+      canvas.height/2,
+  ],
+    spawningSpeed: 3,
+    incubationTime: 3,
+  }
+
+  const state = {
+    actionsCounter: 0,
+    chickens: [],
+    eggs: [],
+  }
+
   class Egg {
-    constructor(x, y) {
+    constructor(x, y, id) {
       this.x = x;
       this.y = y;
+      this.id = id;
+      this.incubationStage = 0;
+    }
+    incubate() {
+      if (this.incubationStage === config.incubationTime) {
+        spawnChicken(this.x, this.y);
+        this.delete();
+        return;
+      }
+      this.incubationStage++;
+      console.log(this.incubationStage);
+      setTimeout(() => this.incubate(), 2000);
+    }
+    delete() {
+      state.eggs[this.id] = undefined;
     }
     draw() {
       // var img = new Image();
@@ -43,6 +73,8 @@
       context.beginPath();
       context.arc(this.x, this.y, 50, 0, Math.PI*2);
       context.fillStyle = "#0095DD";
+      // context.font = "30px Arial";
+      // context.fillText(this.incubationStage, 10, 50); 
       context.fill();
       context.closePath();
     }
@@ -71,25 +103,12 @@
     }
     layEgg () {
       if (this.eggTimer === config.spawningSpeed) {
-        const newEgg = new Egg(this.x, this.y);
+        const newEgg = new Egg(this.x, this.y, state.eggs.length);
+        newEgg.incubate();
         state.eggs.push(newEgg);
-        this.eggTimer = 0;      
+        this.eggTimer = 0;
       }
     }
-  }
-
-  const config = {
-    inintialCoordinates: [ 
-      canvas.width/2,
-      canvas.height/2,
-  ],
-    spawningSpeed: 5,
-  }
-
-  const state = {
-    actionsCounter: 0,
-    chickens: [],
-    eggs: [],
   }
 
   function spawnChicken(x, y) {
@@ -102,13 +121,12 @@
     state.chickens.forEach((chicken) => chicken.move(50, 50));
     state.chickens.forEach((chicken) => chicken.layEgg());
     state.actionsCounter++;
-    if (state.actionsCounter%spawningSpeed === 0) { spawnChicken(...config.inintialCoordinates); }
   }
 
   function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     state.chickens.forEach((chicken) => chicken.draw());
-    state.eggs.forEach((egg) => egg.draw());
+    state.eggs.forEach((egg) => { if(egg) { egg.draw(); }});
     // requestAnimationFrame(draw);
   }
 
