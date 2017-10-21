@@ -4,36 +4,59 @@
   <meta charset="utf-8" />
   <title>Happy Mrs. Chicken</title>
   <style>
-    * { margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; }
-    canvas { display: block; }
+    body {
+      position: absolute;
+      padding:0;
+      margin:0;
+      height: 100%;
+      width:100%
+    }
     canvas {
     background: #3AC1FB;
   }
   </style>
 </head>
-<body>
+<body onload="onload()" onresize="resize()">
 
 <canvas id="canvas"></canvas>
 
 <script>
-  window.addEventListener('resize', resizeCanvas, false);
-  const canvas = document.getElementById('canvas');
-  const context = canvas.getContext('2d');
+    let canvas;
+    let context;
+    let chicken;
+    let egg;
+    let imageReady = false;
+    const config = {
+      spawningSpeed: 3,
+      incubationTime: 3,
+    };
+    function onload() {
+      console.log('onload fired');
+      canvas = document.getElementById('canvas');
+      chicken = new Image();
+      egg = new Image();
+      egg.src = "egg.svg";
+      chicken.src = "chicken.svg";
+      egg.onload = () => {
+        imageReady = true; // Handle other images ready
+        redraw();
+      }
+      chicken.onload = () => {
+        imageReady = true;
+        redraw();
+      }
+      resize();
+      spawnChicken(...config.inintialCoordinates);
+    }
   
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-
-  const config = {
-    inintialCoordinates: [ 
+  function resize() {
+    canvas.width = canvas.parentNode.clientWidth;
+    canvas.height = canvas.parentNode.clientHeight;
+    context = canvas.getContext('2d');
+    config.inintialCoordinates = [
       canvas.width/2,
       canvas.height/2,
-  ],
-    spawningSpeed: 3,
-    incubationTime: 3,
+    ];
   }
 
   const state = {
@@ -63,13 +86,9 @@
       state.eggs[this.id] = undefined;
     }
     draw() {
-      // var img = new Image();
-      // img.onload = () => {
-      //   const width = 100;
-      //   const height = 100;
-      //   context.drawImage(img, this.x, this.y, width, height);
-      // }
-      // img.src = "egg.svg";
+      const width = 100;
+      const height = 100;
+      // context.drawImage(egg, this.x, this.y, width, height);      
       context.beginPath();
       context.arc(this.x, this.y, 50, 0, Math.PI*2);
       context.fillStyle = "#0095DD";
@@ -87,13 +106,9 @@
       this.eggTimer = 0;
     }
     draw() {
-      var img = new Image();
-      img.onload = () => {
-        const width = 100;
-        const height = 100;
-        context.drawImage(img, this.x, this.y, width, height);
-      }
-      img.src = "chicken.svg";
+      const width = 100;
+      const height = 100;
+      if (imageReady) { context.drawImage(chicken, this.x, this.y, width, height); }
     }
     move(dx, dy) {
       const randomSign = () => Math.sign(Math.random()-0.5);
@@ -123,16 +138,14 @@
     state.actionsCounter++;
   }
 
-  function draw() {
+  function redraw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     state.chickens.forEach((chicken) => chicken.draw());
     state.eggs.forEach((egg) => { if(egg) { egg.draw(); }});
-    // requestAnimationFrame(draw);
+    // requestAnimationFrame(redraw);
   }
 
-  spawnChicken(...config.inintialCoordinates);
-  setInterval(draw, 500);
-  // draw();
+  setInterval(redraw, 50);
   document.addEventListener('keydown', action, false);
 
 </script>
