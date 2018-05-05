@@ -25,28 +25,25 @@
     let context;
     let chicken;
     let egg;
-    let imageReady = false;
+    let imagesReady = false;
     const config = {
       spawningSpeed: 3,
       incubationTime: 3,
     };
-    function onload() {
+    async function onload() {
       console.log('onload fired');
       canvas = document.getElementById('canvas');
-      chicken = new Image();
-      egg = new Image();
-      egg.src = "egg.svg";
-      chicken.src = "chicken.svg";
-      egg.onload = () => {
-        imageReady = true; // Handle other images ready
-        redraw();
-      }
-      chicken.onload = () => {
-        imageReady = true;
-        redraw();
-      }
+      const loadImg = (src) => new Promise((resolve) => {
+        const image = new Image();
+        image.src = src;
+        image.onload = () => resolve(image);
+      });
       resize();
       spawnChicken(...config.inintialCoordinates);
+      chicken = await loadImg('./images/kurka01.svg');
+      egg = await loadImg('./images/jajo01.svg');
+      imagesReady = true;
+      redraw();
     }
   
   function resize() {
@@ -79,8 +76,7 @@
         return;
       }
       this.incubationStage++;
-      console.log(this.incubationStage);
-      setTimeout(() => this.incubate(), 2000);
+      setTimeout(() => this.incubate(), 1000);
     }
     delete() {
       state.eggs[this.id] = undefined;
@@ -88,14 +84,7 @@
     draw() {
       const width = 100;
       const height = 100;
-      // context.drawImage(egg, this.x, this.y, width, height);      
-      context.beginPath();
-      context.arc(this.x, this.y, 50, 0, Math.PI*2);
-      context.fillStyle = "#0095DD";
-      // context.font = "30px Arial";
-      // context.fillText(this.incubationStage, 10, 50); 
-      context.fill();
-      context.closePath();
+      if (imagesReady) { context.drawImage(egg, this.x, this.y, width, height); }
     }
   }
 
@@ -108,7 +97,7 @@
     draw() {
       const width = 100;
       const height = 100;
-      if (imageReady) { context.drawImage(chicken, this.x, this.y, width, height); }
+      if (imagesReady) { context.drawImage(chicken, this.x, this.y, width, height); }
     }
     move(dx, dy) {
       const randomSign = () => Math.sign(Math.random()-0.5);
@@ -142,10 +131,9 @@
     context.clearRect(0, 0, canvas.width, canvas.height);
     state.chickens.forEach((chicken) => chicken.draw());
     state.eggs.forEach((egg) => { if(egg) { egg.draw(); }});
-    // requestAnimationFrame(redraw);
+    requestAnimationFrame(redraw);
   }
 
-  setInterval(redraw, 50);
   document.addEventListener('keydown', action, false);
 
 </script>
