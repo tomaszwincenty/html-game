@@ -11,18 +11,30 @@
       height: 100%;
       width:100%
     }
-    canvas {
+  #canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+  }
+  #bottomLayerCanvas {
     background: #3AC1FB;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0;
   }
   </style>
 </head>
 <body onload="onload()" onresize="resize()">
 
 <canvas id="canvas"></canvas>
+<canvas id="bottomLayerCanvas"></canvas>
 
 <script>
     let canvas;
-    let context;
+    let bottomLayerCanvas;
+    let bottomLayerContext;
     let chicken;
     let egg;
     let imagesReady = false;
@@ -33,6 +45,7 @@
     async function onload() {
       console.log('onload fired');
       canvas = document.getElementById('canvas');
+      bottomLayerCanvas = document.getElementById('bottomLayerCanvas');
       const loadImg = (src) => new Promise((resolve) => {
         const image = new Image();
         image.src = src;
@@ -50,6 +63,11 @@
     canvas.width = canvas.parentNode.clientWidth;
     canvas.height = canvas.parentNode.clientHeight;
     context = canvas.getContext('2d');
+
+    bottomLayerCanvas.width = bottomLayerCanvas.parentNode.clientWidth;
+    bottomLayerCanvas.height = bottomLayerCanvas.parentNode.clientHeight;
+    bottomLayerContext = bottomLayerCanvas.getContext('2d');
+
     config.inintialCoordinates = [
       canvas.width/2,
       canvas.height/2,
@@ -84,7 +102,7 @@
     draw() {
       const width = 100;
       const height = 100;
-      if (imagesReady) { context.drawImage(egg, this.x, this.y, width, height); }
+      if (imagesReady) { bottomLayerContext.drawImage(egg, this.x, this.y, width, height); }
     }
   }
 
@@ -129,6 +147,7 @@
 
   function redraw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    bottomLayerContext.clearRect(0, 0, canvas.width, canvas.height);
     state.chickens.forEach((chicken) => chicken.draw());
     state.eggs.forEach((egg) => { if(egg) { egg.draw(); }});
     requestAnimationFrame(redraw);
