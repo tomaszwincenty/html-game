@@ -84,9 +84,9 @@
   }
 
   const state = {
-    actionsCounter: 0,
     chickens: [],
     eggs: [],
+    gameActive: true,
   }
 
   class Egg {
@@ -172,11 +172,24 @@
     state.chickens.push(newChicken);
   }
 
+  showGameProgress = () => {
+    const chickensCounter = state.chickens.length;
+    const eggsCounter = state.eggs.filter((v) => v).length;
+    topLayerContext.fillStyle = "red";
+    topLayerContext.font = "30px Arial";
+    topLayerContext.fillText(`${chickensCounter} chickens and ${eggsCounter} eggs!`, 10, 50);
+    if (chickensCounter + eggsCounter > 150) {
+      topLayerContext.fillText('You win!', 10, 100);
+      state.gameActive = false;
+    }
+  }
+
   action = () => {
     const { spawningSpeed } = config;
-    state.chickens.forEach((chicken) => chicken.move(50, 50));
-    state.chickens.forEach((chicken) => chicken.layEgg());
-    state.actionsCounter++;
+    if (state.gameActive) {
+      state.chickens.forEach((chicken) => chicken.move(50, 50));
+      state.chickens.forEach((chicken) => chicken.layEgg());
+    }
   }
 
   function redraw() {
@@ -184,6 +197,7 @@
     bottomLayerContext.clearRect(0, 0, bottomLayerCanvas.width, bottomLayerCanvas.height);
     state.chickens.forEach((chicken) => chicken.draw());
     state.eggs.forEach((egg) => { if(egg) { egg.draw(); }});
+    showGameProgress();
     requestAnimationFrame(redraw);
   }
 
