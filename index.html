@@ -119,9 +119,15 @@
       if (imagesReady) { topLayerContext.drawImage(chicken, this.x, this.y, width, height); }
     }
     move(dx, dy) {
-      const randomSign = () => Math.sign(Math.random()-0.5);
-      this.x = this.x + randomSign()*dx;
-      this.y = this.y + randomSign()*dy;
+      const randomSign = () => Math.sign(Math.random() - 0.5);
+      const bounce = (coordinate, dimention, distance) => {        
+        if (coordinate < 0) return coordinate + distance;
+        if (coordinate + 100 > topLayerCanvas[dimention]) return coordinate - distance;
+        return coordinate;
+        };
+      const newCoord = (coordinate, distance) => coordinate + randomSign()*distance;
+      this.x = bounce(newCoord(this.x, dx), 'width', dx);
+      this.y = bounce(newCoord(this.y, dy), 'height', dy);
       this.eggTimer++;
     }
     layEgg () {
