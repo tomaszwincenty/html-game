@@ -11,7 +11,7 @@
       height: 100%;
       width:100%
     }
-  #canvas {
+  #topLayerCanvas {
     position: absolute;
     left: 0;
     top: 0;
@@ -28,11 +28,12 @@
 </head>
 <body onload="onload()" onresize="resize()">
 
-<canvas id="canvas"></canvas>
+<canvas id="topLayerCanvas"></canvas>
 <canvas id="bottomLayerCanvas"></canvas>
 
 <script>
-    let canvas;
+    let topLayerCanvas;
+    let topLayerContext;
     let bottomLayerCanvas;
     let bottomLayerContext;
     let chicken;
@@ -44,7 +45,7 @@
     };
     async function onload() {
       console.log('onload fired');
-      canvas = document.getElementById('canvas');
+      topLayerCanvas = document.getElementById('topLayerCanvas');
       bottomLayerCanvas = document.getElementById('bottomLayerCanvas');
       const loadImg = (src) => new Promise((resolve) => {
         const image = new Image();
@@ -60,17 +61,17 @@
     }
   
   function resize() {
-    canvas.width = canvas.parentNode.clientWidth;
-    canvas.height = canvas.parentNode.clientHeight;
-    context = canvas.getContext('2d');
+    topLayerCanvas.width = topLayerCanvas.parentNode.clientWidth;
+    topLayerCanvas.height = topLayerCanvas.parentNode.clientHeight;
+    topLayerContext = topLayerCanvas.getContext('2d');
 
     bottomLayerCanvas.width = bottomLayerCanvas.parentNode.clientWidth;
     bottomLayerCanvas.height = bottomLayerCanvas.parentNode.clientHeight;
     bottomLayerContext = bottomLayerCanvas.getContext('2d');
 
     config.inintialCoordinates = [
-      canvas.width/2,
-      canvas.height/2,
+      topLayerCanvas.width/2,
+      topLayerCanvas.height/2,
     ];
   }
 
@@ -115,7 +116,7 @@
     draw() {
       const width = 100;
       const height = 100;
-      if (imagesReady) { context.drawImage(chicken, this.x, this.y, width, height); }
+      if (imagesReady) { topLayerContext.drawImage(chicken, this.x, this.y, width, height); }
     }
     move(dx, dy) {
       const randomSign = () => Math.sign(Math.random()-0.5);
@@ -146,8 +147,8 @@
   }
 
   function redraw() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    bottomLayerContext.clearRect(0, 0, canvas.width, canvas.height);
+    topLayerContext.clearRect(0, 0, topLayerCanvas.width, topLayerCanvas.height);
+    bottomLayerContext.clearRect(0, 0, bottomLayerCanvas.width, bottomLayerCanvas.height);
     state.chickens.forEach((chicken) => chicken.draw());
     state.eggs.forEach((egg) => { if(egg) { egg.draw(); }});
     requestAnimationFrame(redraw);
