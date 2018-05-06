@@ -37,11 +37,13 @@
     let bottomLayerCanvas;
     let bottomLayerContext;
     let chicken;
-    let egg;
+    let egg0;
+    let egg1;
+    let egg2;
     let imagesReady = false;
     const config = {
       spawningSpeed: 3,
-      incubationTime: 3,
+      incubationTime: 4,
     };
     async function onload() {
       console.log('onload fired');
@@ -54,8 +56,12 @@
       });
       resize();
       spawnChicken(...config.inintialCoordinates);
-      chicken = await loadImg('./images/kurka01.svg');
-      egg = await loadImg('./images/jajo01.svg');
+      chicken0 = await loadImg('./images/kurka01.svg');
+      chicken1 = await loadImg('./images/kurka02.svg');
+      chicken = chicken0;
+      egg0 = await loadImg('./images/jajo01.svg');
+      egg1 = await loadImg('./images/jajo02.svg');
+      egg2 = await loadImg('./images/jajo03.svg');
       imagesReady = true;
       redraw();
     }
@@ -103,6 +109,19 @@
     draw() {
       const width = 100;
       const height = 100;
+      let egg;
+      switch(config.incubationTime - this.incubationStage) {
+        case 2:
+        default:
+        egg = egg0;
+          break;
+        case 1:
+        egg = egg1;
+          break;
+        case 0:
+        egg = egg2;
+          break;
+      }
       if (imagesReady) { bottomLayerContext.drawImage(egg, this.x, this.y, width, height); }
     }
   }
@@ -132,7 +151,13 @@
     }
     layEgg () {
       if (this.eggTimer === config.spawningSpeed) {
-        const newEgg = new Egg(this.x, this.y, state.eggs.length);
+        const setLayEggImage = () => {
+          chicken = chicken1;
+          this.y -= 20;
+          setTimeout(() => { chicken = chicken0; this.y += 20; }, 500);
+        }
+        setLayEggImage();
+        const newEgg = new Egg(this.x, this.y + 20, state.eggs.length);
         newEgg.incubate();
         state.eggs.push(newEgg);
         this.eggTimer = 0;
