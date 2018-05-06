@@ -45,8 +45,7 @@
       spawningSpeed: 3,
       incubationTime: 4,
     };
-    async function onload() {
-      console.log('onload fired');
+    onload = () => {
       topLayerCanvas = document.getElementById('topLayerCanvas');
       bottomLayerCanvas = document.getElementById('bottomLayerCanvas');
       const loadImg = (src) => new Promise((resolve) => {
@@ -56,14 +55,17 @@
       });
       resize();
       spawnChicken(...config.inintialCoordinates);
-      chicken0 = await loadImg('./images/kurka01.svg');
-      chicken1 = await loadImg('./images/kurka02.svg');
-      chicken = chicken0;
-      egg0 = await loadImg('./images/jajo01.svg');
-      egg1 = await loadImg('./images/jajo02.svg');
-      egg2 = await loadImg('./images/jajo03.svg');
-      imagesReady = true;
-      redraw();
+      Promise.all([
+        loadImg('./images/kurka01.svg').then((res) => chicken0 = res),
+        loadImg('./images/kurka02.svg').then((res) => chicken1 = res),
+        loadImg('./images/jajo01.svg').then((res) => egg0 = res),
+        loadImg('./images/jajo02.svg').then((res) => egg1 = res),
+        loadImg('./images/jajo03.svg').then((res) => egg2 = res),
+          ]).then(() => {
+            chicken = chicken0;
+            imagesReady = true;
+            redraw();
+          });
     }
   
   function resize() {
@@ -165,12 +167,12 @@
     }
   }
 
-  function spawnChicken(x, y) {
+  spawnChicken = (x, y) => {
     const newChicken = new Chicken(x, y);
     state.chickens.push(newChicken);
   }
 
-  function action() {
+  action = () => {
     const { spawningSpeed } = config;
     state.chickens.forEach((chicken) => chicken.move(50, 50));
     state.chickens.forEach((chicken) => chicken.layEgg());
